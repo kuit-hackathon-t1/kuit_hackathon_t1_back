@@ -1,12 +1,14 @@
 package com.example.kuit_hackathon_back.domain.user.entity;
 
-import com.example.kuit_hackathon_back.global.entity.BaseCreatedAtEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+
+import com.example.kuit_hackathon_back.global.entity.BaseCreatedAtEntity;
+
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;

@@ -1,6 +1,7 @@
 package com.example.kuit_hackathon_back.global.exception;
 
 import java.util.Map;
+
 import lombok.Getter;
 
 @Getter

@@ -1,9 +1,8 @@
 package com.example.kuit_hackathon_back.domain.collection.entity;
 
-import com.example.kuit_hackathon_back.domain.mission.entity.Mission;
-import com.example.kuit_hackathon_back.domain.trip.entity.Trip;
-import com.example.kuit_hackathon_back.domain.user.entity.User;
-import com.example.kuit_hackathon_back.global.entity.BaseTimeEntity;
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -18,8 +17,12 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import java.util.ArrayList;
-import java.util.List;
+
+import com.example.kuit_hackathon_back.domain.mission.entity.Mission;
+import com.example.kuit_hackathon_back.domain.trip.entity.Trip;
+import com.example.kuit_hackathon_back.domain.user.entity.User;
+import com.example.kuit_hackathon_back.global.entity.BaseTimeEntity;
+
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -66,8 +69,14 @@ public class Collection extends BaseTimeEntity {
     private List<Emotion> emotions = new ArrayList<>();
 
     @Builder
-    private Collection(String memo, String localImageId, CollectionStatus status, Mission mission, Trip trip,
-            User user, CropType cropType) {
+    private Collection(
+            String memo,
+            String localImageId,
+            CollectionStatus status,
+            Mission mission,
+            Trip trip,
+            User user,
+            CropType cropType) {
         this.memo = memo;
         this.localImageId = localImageId;
         this.status = status;

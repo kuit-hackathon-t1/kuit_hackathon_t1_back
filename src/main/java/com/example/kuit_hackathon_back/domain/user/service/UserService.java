@@ -1,10 +1,12 @@
 package com.example.kuit_hackathon_back.domain.user.service;
 
-import com.example.kuit_hackathon_back.domain.user.entity.User;
-import com.example.kuit_hackathon_back.domain.user.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.example.kuit_hackathon_back.domain.user.entity.User;
+import com.example.kuit_hackathon_back.domain.user.repository.UserRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -15,11 +17,11 @@ public class UserService {
 
     @Transactional
     public LoginResult login(String nickname) {
-        return userRepository.findByNickname(nickname)
+        return userRepository
+                .findByNickname(nickname)
                 .map(user -> new LoginResult(user, false))
                 .orElseGet(() -> new LoginResult(userRepository.save(User.create(nickname)), true));
     }
 
-    public record LoginResult(User user, boolean created) {
-    }
+    public record LoginResult(User user, boolean created) {}
 }

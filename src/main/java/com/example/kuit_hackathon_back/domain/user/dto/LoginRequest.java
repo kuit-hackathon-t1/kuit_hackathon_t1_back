@@ -5,7 +5,5 @@ import jakarta.validation.constraints.Size;
 
 public record LoginRequest(
         @NotBlank(message = "닉네임을 입력해주세요.")
-        @Size(min = 1, max = 15, message = "닉네임은 1자 이상 15자 이하입니다.")
-        String nickname
-) {
-}
+                @Size(min = 1, max = 15, message = "닉네임은 1자 이상 15자 이하입니다.")
+                String nickname) {}

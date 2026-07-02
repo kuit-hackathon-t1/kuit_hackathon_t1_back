@@ -1,7 +1,8 @@
 package com.example.kuit_hackathon_back.domain.user.dto;
 
-import com.example.kuit_hackathon_back.domain.user.entity.User;
 import java.time.LocalDateTime;
+
+import com.example.kuit_hackathon_back.domain.user.entity.User;
 
 public record LoginResponse(Long userId, String nickname, LocalDateTime createdAt) {
 

@@ -1,11 +1,12 @@
 package com.example.kuit_hackathon_back.domain.mission.dto;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 import com.example.kuit_hackathon_back.domain.mission.entity.Mission;
 import com.example.kuit_hackathon_back.domain.mission.entity.MissionCategory;
 import com.example.kuit_hackathon_back.domain.mission.entity.MissionGuide;
 import com.example.kuit_hackathon_back.domain.mission.entity.MissionStatus;
-import java.time.LocalDateTime;
-import java.util.List;
 
 public record RandomMissionResponse(
         Long missionId,
@@ -16,12 +17,16 @@ public record RandomMissionResponse(
         MissionStatus missionStatus,
         boolean isLocal,
         List<String> guides,
-        LocalDateTime createdAt
-) {
+        LocalDateTime createdAt) {
     public static RandomMissionResponse from(Mission mission) {
         return new RandomMissionResponse(
-                mission.getMissionId(), mission.getTrip().getTripId(), mission.getTitle(), mission.getDescription(),
-                mission.getMissionCategory(), mission.getMissionStatus(), mission.isLocal(),
+                mission.getMissionId(),
+                mission.getTrip().getTripId(),
+                mission.getTitle(),
+                mission.getDescription(),
+                mission.getMissionCategory(),
+                mission.getMissionStatus(),
+                mission.isLocal(),
                 mission.getGuides().stream().map(MissionGuide::getComment).toList(),
                 mission.getCreatedAt());
     }

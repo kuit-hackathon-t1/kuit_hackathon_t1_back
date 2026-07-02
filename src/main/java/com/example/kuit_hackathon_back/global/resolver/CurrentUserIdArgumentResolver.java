@@ -1,12 +1,13 @@
 package com.example.kuit_hackathon_back.global.resolver;
 
-import com.example.kuit_hackathon_back.global.exception.BusinessException;
-import com.example.kuit_hackathon_back.global.exception.ErrorCode;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
+
+import com.example.kuit_hackathon_back.global.exception.BusinessException;
+import com.example.kuit_hackathon_back.global.exception.ErrorCode;
 
 public class CurrentUserIdArgumentResolver implements HandlerMethodArgumentResolver {
 
@@ -19,8 +20,11 @@ public class CurrentUserIdArgumentResolver implements HandlerMethodArgumentResol
     }
 
     @Override
-    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-            NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
+    public Object resolveArgument(
+            MethodParameter parameter,
+            ModelAndViewContainer mavContainer,
+            NativeWebRequest webRequest,
+            WebDataBinderFactory binderFactory) {
         String value = webRequest.getHeader(HEADER_NAME);
         if (value == null || value.isBlank()) {
             throw new BusinessException(ErrorCode.UNAUTHORIZED, "X-User-Id 헤더가 필요합니다.");

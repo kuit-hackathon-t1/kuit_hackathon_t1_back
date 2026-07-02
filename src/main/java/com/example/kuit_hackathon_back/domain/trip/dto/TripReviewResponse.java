@@ -1,9 +1,10 @@
 package com.example.kuit_hackathon_back.domain.trip.dto;
 
+import java.time.LocalDate;
+
 import com.example.kuit_hackathon_back.domain.trip.entity.CompanionType;
 import com.example.kuit_hackathon_back.domain.trip.entity.TripMood;
 import com.example.kuit_hackathon_back.domain.trip.entity.TripStatus;
-import java.time.LocalDate;
 
 public record TripReviewResponse(
         Long tripId,
@@ -17,6 +18,4 @@ public record TripReviewResponse(
         long successMissionCount,
         long failedMissionCount,
         long totalMissionCount,
-        long totalCollectionCount
-) {
-}
+        long totalCollectionCount) {}

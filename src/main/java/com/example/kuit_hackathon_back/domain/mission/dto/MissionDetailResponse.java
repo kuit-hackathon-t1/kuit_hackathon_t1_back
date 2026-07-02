@@ -1,11 +1,12 @@
 package com.example.kuit_hackathon_back.domain.mission.dto;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 import com.example.kuit_hackathon_back.domain.mission.entity.Mission;
 import com.example.kuit_hackathon_back.domain.mission.entity.MissionCategory;
 import com.example.kuit_hackathon_back.domain.mission.entity.MissionGuide;
 import com.example.kuit_hackathon_back.domain.mission.entity.MissionStatus;
-import java.time.LocalDateTime;
-import java.util.List;
 
 public record MissionDetailResponse(
         Long missionId,
@@ -17,13 +18,18 @@ public record MissionDetailResponse(
         boolean isLocal,
         List<String> guides,
         LocalDateTime createdAt,
-        LocalDateTime updatedAt
-) {
+        LocalDateTime updatedAt) {
     public static MissionDetailResponse from(Mission mission) {
         return new MissionDetailResponse(
-                mission.getMissionId(), mission.getTrip().getTripId(), mission.getTitle(), mission.getDescription(),
-                mission.getMissionCategory(), mission.getMissionStatus(), mission.isLocal(),
+                mission.getMissionId(),
+                mission.getTrip().getTripId(),
+                mission.getTitle(),
+                mission.getDescription(),
+                mission.getMissionCategory(),
+                mission.getMissionStatus(),
+                mission.isLocal(),
                 mission.getGuides().stream().map(MissionGuide::getComment).toList(),
-                mission.getCreatedAt(), mission.getUpdatedAt());
+                mission.getCreatedAt(),
+                mission.getUpdatedAt());
     }
 }

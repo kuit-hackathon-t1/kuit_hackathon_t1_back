@@ -1,9 +1,7 @@
 package com.example.kuit_hackathon_back.domain.trip.entity;
 
-import com.example.kuit_hackathon_back.domain.user.entity.User;
-import com.example.kuit_hackathon_back.global.entity.BaseTimeEntity;
-import com.example.kuit_hackathon_back.global.exception.BusinessException;
-import com.example.kuit_hackathon_back.global.exception.ErrorCode;
+import java.time.LocalDate;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -15,7 +13,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.LocalDate;
+
+import com.example.kuit_hackathon_back.domain.user.entity.User;
+import com.example.kuit_hackathon_back.global.entity.BaseTimeEntity;
+import com.example.kuit_hackathon_back.global.exception.BusinessException;
+import com.example.kuit_hackathon_back.global.exception.ErrorCode;
+
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -61,8 +64,14 @@ public class Trip extends BaseTimeEntity {
     private User user;
 
     @Builder
-    private Trip(String tripName, String region, LocalDate startDate, LocalDate endDate,
-            CompanionType companionType, TripMood mood, User user) {
+    private Trip(
+            String tripName,
+            String region,
+            LocalDate startDate,
+            LocalDate endDate,
+            CompanionType companionType,
+            TripMood mood,
+            User user) {
         this.tripName = tripName;
         this.region = region;
         this.startDate = startDate;

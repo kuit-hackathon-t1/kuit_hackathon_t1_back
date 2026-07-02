@@ -1,9 +1,11 @@
 package com.example.kuit_hackathon_back.domain.collection.repository;
 
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
 import com.example.kuit_hackathon_back.domain.collection.entity.Collection;
 import com.example.kuit_hackathon_back.domain.collection.entity.CollectionStatus;
-import java.util.List;
-import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CollectionRepository extends JpaRepository<Collection, Long> {
 

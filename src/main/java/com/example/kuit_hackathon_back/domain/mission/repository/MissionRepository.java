@@ -1,9 +1,11 @@
 package com.example.kuit_hackathon_back.domain.mission.repository;
 
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
 import com.example.kuit_hackathon_back.domain.mission.entity.Mission;
 import com.example.kuit_hackathon_back.domain.mission.entity.MissionStatus;
-import java.util.List;
-import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface MissionRepository extends JpaRepository<Mission, Long> {
 

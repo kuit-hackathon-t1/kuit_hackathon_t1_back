@@ -1,13 +1,10 @@
 package com.example.kuit_hackathon_back.domain.mission.entity;
 
-import com.example.kuit_hackathon_back.domain.collection.entity.CollectionStatus;
-import com.example.kuit_hackathon_back.domain.trip.entity.Trip;
-import com.example.kuit_hackathon_back.domain.user.entity.User;
-import com.example.kuit_hackathon_back.global.entity.BaseTimeEntity;
-import com.example.kuit_hackathon_back.global.exception.BusinessException;
-import com.example.kuit_hackathon_back.global.exception.ErrorCode;
-import jakarta.persistence.Column;
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -20,8 +17,14 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
-import java.util.ArrayList;
-import java.util.List;
+
+import com.example.kuit_hackathon_back.domain.collection.entity.CollectionStatus;
+import com.example.kuit_hackathon_back.domain.trip.entity.Trip;
+import com.example.kuit_hackathon_back.domain.user.entity.User;
+import com.example.kuit_hackathon_back.global.entity.BaseTimeEntity;
+import com.example.kuit_hackathon_back.global.exception.BusinessException;
+import com.example.kuit_hackathon_back.global.exception.ErrorCode;
+
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -68,7 +71,12 @@ public class Mission extends BaseTimeEntity {
     private List<MissionGuide> guides = new ArrayList<>();
 
     @Builder
-    private Mission(String title, String description, MissionCategory missionCategory, boolean local, User user,
+    private Mission(
+            String title,
+            String description,
+            MissionCategory missionCategory,
+            boolean local,
+            User user,
             Trip trip) {
         this.title = title;
         this.description = description;
@@ -87,18 +95,22 @@ public class Mission extends BaseTimeEntity {
         if (this.missionStatus == MissionStatus.ACTIVE) {
             throw new BusinessException(ErrorCode.MISSION_ALREADY_STARTED);
         }
-        if (this.missionStatus == MissionStatus.SUCCESS || this.missionStatus == MissionStatus.FAILURE) {
+        if (this.missionStatus == MissionStatus.SUCCESS
+                || this.missionStatus == MissionStatus.FAILURE) {
             throw new BusinessException(ErrorCode.MISSION_ALREADY_COMPLETED);
         }
         this.missionStatus = MissionStatus.ACTIVE;
     }
 
     public void complete(CollectionStatus collectionStatus) {
-        if (this.missionStatus == MissionStatus.SUCCESS || this.missionStatus == MissionStatus.FAILURE) {
+        if (this.missionStatus == MissionStatus.SUCCESS
+                || this.missionStatus == MissionStatus.FAILURE) {
             throw new BusinessException(ErrorCode.MISSION_ALREADY_COMPLETED, "이미 기록된 미션입니다.");
         }
-        this.missionStatus = collectionStatus == CollectionStatus.SUCCESS ? MissionStatus.SUCCESS
-                : MissionStatus.FAILURE;
+        this.missionStatus =
+                collectionStatus == CollectionStatus.SUCCESS
+                        ? MissionStatus.SUCCESS
+                        : MissionStatus.FAILURE;
     }
 
     public boolean isOwnedBy(Long userId) {

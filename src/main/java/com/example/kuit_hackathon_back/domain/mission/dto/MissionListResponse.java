@@ -1,10 +1,11 @@
 package com.example.kuit_hackathon_back.domain.mission.dto;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 import com.example.kuit_hackathon_back.domain.mission.entity.Mission;
 import com.example.kuit_hackathon_back.domain.mission.entity.MissionCategory;
 import com.example.kuit_hackathon_back.domain.mission.entity.MissionStatus;
-import java.time.LocalDateTime;
-import java.util.List;
 
 public record MissionListResponse(Long tripId, List<MissionItem> missions) {
 
@@ -19,11 +20,15 @@ public record MissionListResponse(Long tripId, List<MissionItem> missions) {
             MissionCategory missionCategory,
             MissionStatus missionStatus,
             boolean isLocal,
-            LocalDateTime createdAt
-    ) {
+            LocalDateTime createdAt) {
         public static MissionItem from(Mission mission) {
-            return new MissionItem(mission.getMissionId(), mission.getTitle(), mission.getDescription(),
-                    mission.getMissionCategory(), mission.getMissionStatus(), mission.isLocal(),
+            return new MissionItem(
+                    mission.getMissionId(),
+                    mission.getTitle(),
+                    mission.getDescription(),
+                    mission.getMissionCategory(),
+                    mission.getMissionStatus(),
+                    mission.isLocal(),
                     mission.getCreatedAt());
         }
     }

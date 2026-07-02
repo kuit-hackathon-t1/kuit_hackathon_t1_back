@@ -1,5 +1,10 @@
 package com.example.kuit_hackathon_back.domain.mission.service;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.example.kuit_hackathon_back.domain.mission.dto.MissionDetailResponse;
 import com.example.kuit_hackathon_back.domain.mission.dto.MissionListResponse;
 import com.example.kuit_hackathon_back.domain.mission.dto.MissionStartResponse;
@@ -15,10 +20,8 @@ import com.example.kuit_hackathon_back.domain.user.entity.User;
 import com.example.kuit_hackathon_back.domain.user.repository.UserRepository;
 import com.example.kuit_hackathon_back.global.exception.BusinessException;
 import com.example.kuit_hackathon_back.global.exception.ErrorCode;
-import java.util.List;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -39,14 +42,15 @@ public class MissionService {
         User user = getUserOrThrow(userId);
         MissionTemplate template = templateProvider.getRandomTemplate();
 
-        Mission mission = Mission.builder()
-                .title(template.title())
-                .description(template.description())
-                .missionCategory(template.category())
-                .local(template.isLocal())
-                .user(user)
-                .trip(trip)
-                .build();
+        Mission mission =
+                Mission.builder()
+                        .title(template.title())
+                        .description(template.description())
+                        .missionCategory(template.category())
+                        .local(template.isLocal())
+                        .user(user)
+                        .trip(trip)
+                        .build();
         template.guides().forEach(mission::addGuide);
 
         return RandomMissionResponse.from(missionRepository.save(mission));
@@ -61,9 +65,10 @@ public class MissionService {
 
     public MissionListResponse getMissions(Long userId, Long tripId, MissionStatus status) {
         getOwnedTripOrThrow(userId, tripId);
-        List<Mission> missions = (status == null)
-                ? missionRepository.findByTrip_TripId(tripId)
-                : missionRepository.findByTrip_TripIdAndMissionStatus(tripId, status);
+        List<Mission> missions =
+                (status == null)
+                        ? missionRepository.findByTrip_TripId(tripId)
+                        : missionRepository.findByTrip_TripIdAndMissionStatus(tripId, status);
         return MissionListResponse.of(tripId, missions);
     }
 
@@ -72,8 +77,10 @@ public class MissionService {
     }
 
     private Trip getOwnedTripOrThrow(Long userId, Long tripId) {
-        Trip trip = tripRepository.findById(tripId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.TRIP_NOT_FOUND));
+        Trip trip =
+                tripRepository
+                        .findById(tripId)
+                        .orElseThrow(() -> new BusinessException(ErrorCode.TRIP_NOT_FOUND));
         if (!trip.isOwnedBy(userId)) {
             throw new BusinessException(ErrorCode.TRIP_NOT_FOUND);
         }
@@ -81,8 +88,10 @@ public class MissionService {
     }
 
     private Mission getOwnedMissionOrThrow(Long userId, Long missionId) {
-        Mission mission = missionRepository.findById(missionId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.MISSION_NOT_FOUND));
+        Mission mission =
+                missionRepository
+                        .findById(missionId)
+                        .orElseThrow(() -> new BusinessException(ErrorCode.MISSION_NOT_FOUND));
         if (!mission.isOwnedBy(userId)) {
             throw new BusinessException(ErrorCode.MISSION_NOT_FOUND);
         }
@@ -90,7 +99,8 @@ public class MissionService {
     }
 
     private User getUserOrThrow(Long userId) {
-        return userRepository.findById(userId)
+        return userRepository
+                .findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
     }
 }
