@@ -43,10 +43,10 @@ public class GeminiMissionAiClient implements MissionAiClient {
 
         String responseText;
         try {
-            String url =
-                    "%s/models/%s:generateContent?key=%s"
-                            .formatted(
-                                    properties.getBaseUrl(), properties.getModel(), properties.getApiKey());
+            String baseUrl = properties.getBaseUrl();
+            String model = properties.getModel();
+            String apiKey = properties.getApiKey();
+            String url = "%s/models/%s:generateContent?key=%s".formatted(baseUrl, model, apiKey);
 
             Map<String, Object> response =
                     restClient
@@ -66,14 +66,17 @@ public class GeminiMissionAiClient implements MissionAiClient {
     }
 
     private Map<String, Object> buildRequestBody(MissionAiRequest request) {
-        return Map.of(
-                "contents",
-                List.of(Map.of("role", "user", "parts", List.of(Map.of("text", buildPrompt(request))))),
-                "generationConfig",
+        Map<String, Object> userContent =
+                Map.of("role", "user", "parts", List.of(Map.of("text", buildPrompt(request))));
+        Map<String, Object> generationConfig =
                 Map.of(
-                        "responseMimeType", "application/json",
-                        "responseSchema", buildResponseSchema(),
-                        "temperature", 1.0));
+                        "responseMimeType",
+                        "application/json",
+                        "responseSchema",
+                        buildResponseSchema(),
+                        "temperature",
+                        1.0);
+        return Map.of("contents", List.of(userContent), "generationConfig", generationConfig);
     }
 
     private String buildPrompt(MissionAiRequest request) {
@@ -133,32 +136,41 @@ public class GeminiMissionAiClient implements MissionAiClient {
     }
 
     private Map<String, Object> buildResponseSchema() {
-        return Map.of(
-                "type", "ARRAY",
-                "items",
-                        Map.of(
-                                "type", "OBJECT",
-                                "properties",
-                                        Map.of(
-                                                "title", Map.of("type", "STRING"),
-                                                "description", Map.of("type", "STRING"),
-                                                "missionCategory",
-                                                        Map.of(
-                                                                "type", "STRING",
-                                                                "enum", MISSION_CATEGORIES),
-                                                "isLocal", Map.of("type", "BOOLEAN"),
-                                                "guides",
-                                                        Map.of(
-                                                                "type", "ARRAY",
-                                                                "items", Map.of("type", "STRING"))),
-                                "required",
-                                        List.of("title", "description", "missionCategory", "isLocal", "guides")));
+        Map<String, Object> titleSchema = Map.of("type", "STRING");
+        Map<String, Object> descriptionSchema = Map.of("type", "STRING");
+        Map<String, Object> missionCategorySchema =
+                Map.of("type", "STRING", "enum", MISSION_CATEGORIES);
+        Map<String, Object> isLocalSchema = Map.of("type", "BOOLEAN");
+        Map<String, Object> guidesSchema =
+                Map.of("type", "ARRAY", "items", Map.of("type", "STRING"));
+
+        Map<String, Object> properties =
+                Map.of(
+                        "title",
+                        titleSchema,
+                        "description",
+                        descriptionSchema,
+                        "missionCategory",
+                        missionCategorySchema,
+                        "isLocal",
+                        isLocalSchema,
+                        "guides",
+                        guidesSchema);
+
+        List<String> requiredFields =
+                List.of("title", "description", "missionCategory", "isLocal", "guides");
+
+        Map<String, Object> itemSchema =
+                Map.of("type", "OBJECT", "properties", properties, "required", requiredFields);
+
+        return Map.of("type", "ARRAY", "items", itemSchema);
     }
 
     @SuppressWarnings("unchecked")
     private String extractText(Map<String, Object> response) {
         try {
-            List<Map<String, Object>> candidates = (List<Map<String, Object>>) response.get("candidates");
+            List<Map<String, Object>> candidates =
+                    (List<Map<String, Object>>) response.get("candidates");
             Map<String, Object> content = (Map<String, Object>) candidates.get(0).get("content");
             List<Map<String, Object>> parts = (List<Map<String, Object>>) content.get("parts");
             return (String) parts.get(0).get("text");

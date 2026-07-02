@@ -1,6 +1,7 @@
 package com.example.kuit_hackathon_back.domain.mission.service;
 
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -56,7 +57,8 @@ public class MissionService {
         if (!trip.isActive()) {
             throw new BusinessException(ErrorCode.TRIP_ALREADY_ENDED, "종료된 여행에서는 미션을 생성할 수 없습니다.");
         }
-        if (missionRepository.countByTrip_TripIdAndDrawnAtIsNotNull(tripId) >= MAX_MISSIONS_PER_TRIP) {
+        if (missionRepository.countByTrip_TripIdAndDrawnAtIsNotNull(tripId)
+                >= MAX_MISSIONS_PER_TRIP) {
             throw new BusinessException(ErrorCode.MISSION_LIMIT_EXCEEDED);
         }
         if (missionRepository.countByTrip_TripIdAndMissionStatus(tripId, MissionStatus.ACTIVE)
@@ -79,27 +81,18 @@ public class MissionService {
     /** AI로 미션 배치를 생성해서 저장한다. AI 호출이 실패하면 하드코딩된 템플릿 풀로 폴백한다. */
     private List<Mission> generateMissionPool(User user, Trip trip) {
         try {
-            List<GeneratedMission> generated =
-                    missionAiClient.generateMissions(
-                            new MissionAiRequest(
-                                    trip.getTripName(),
-                                    trip.getRegion(),
-                                    trip.getCompanionType(),
-                                    trip.getMood(),
-                                    MISSION_BATCH_SIZE));
-            List<Mission> missions =
-                    generated.stream()
-                            .map(
-                                    g ->
-                                            buildMission(
-                                                    user,
-                                                    trip,
-                                                    g.title(),
-                                                    g.description(),
-                                                    g.missionCategory(),
-                                                    g.isLocal(),
-                                                    g.guides()))
-                            .toList();
+            MissionAiRequest aiRequest =
+                    new MissionAiRequest(
+                            trip.getTripName(),
+                            trip.getRegion(),
+                            trip.getCompanionType(),
+                            trip.getMood(),
+                            MISSION_BATCH_SIZE);
+            List<GeneratedMission> generated = missionAiClient.generateMissions(aiRequest);
+            List<Mission> missions = new ArrayList<>();
+            for (GeneratedMission g : generated) {
+                missions.add(buildMissionFrom(user, trip, g));
+            }
             return missionRepository.saveAll(missions);
         } catch (RuntimeException e) {
             log.warn(
@@ -107,21 +100,34 @@ public class MissionService {
                     trip.getTripId(),
                     e.toString(),
                     e);
-            List<Mission> fallback =
-                    templateProvider.getAllTemplates().stream()
-                            .map(
-                                    (MissionTemplate t) ->
-                                            buildMission(
-                                                    user,
-                                                    trip,
-                                                    t.title(),
-                                                    t.description(),
-                                                    t.category(),
-                                                    t.isLocal(),
-                                                    t.guides()))
-                            .toList();
+            List<Mission> fallback = new ArrayList<>();
+            for (MissionTemplate t : templateProvider.getAllTemplates()) {
+                fallback.add(buildMissionFrom(user, trip, t));
+            }
             return missionRepository.saveAll(fallback);
         }
+    }
+
+    private Mission buildMissionFrom(User user, Trip trip, GeneratedMission generated) {
+        return buildMission(
+                user,
+                trip,
+                generated.title(),
+                generated.description(),
+                generated.missionCategory(),
+                generated.isLocal(),
+                generated.guides());
+    }
+
+    private Mission buildMissionFrom(User user, Trip trip, MissionTemplate template) {
+        return buildMission(
+                user,
+                trip,
+                template.title(),
+                template.description(),
+                template.category(),
+                template.isLocal(),
+                template.guides());
     }
 
     private Mission buildMission(
@@ -156,11 +162,14 @@ public class MissionService {
     public MissionListResponse getMissions(Long userId, Long tripId, MissionStatus status) {
         getUserOrThrow(userId);
         getOwnedTripOrThrow(userId, tripId);
-        List<Mission> missions =
-                (status == null)
-                        ? missionRepository.findByTrip_TripIdAndDrawnAtIsNotNull(tripId)
-                        : missionRepository.findByTrip_TripIdAndMissionStatusAndDrawnAtIsNotNull(
-                                tripId, status);
+        List<Mission> missions;
+        if (status == null) {
+            missions = missionRepository.findByTrip_TripIdAndDrawnAtIsNotNull(tripId);
+        } else {
+            missions =
+                    missionRepository.findByTrip_TripIdAndMissionStatusAndDrawnAtIsNotNull(
+                            tripId, status);
+        }
         return MissionListResponse.of(tripId, missions);
     }
 
