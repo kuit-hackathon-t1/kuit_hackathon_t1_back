@@ -4,5 +4,5 @@ public enum CompanionType {
     ALONE,
     FRIEND,
     COUPLE,
-    ETC
+    FAMILY
 }
