@@ -14,6 +14,7 @@ public enum ErrorCode {
     ACTIVE_TRIP_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 진행 중인 여행이 있습니다."),
     TRIP_NOT_FOUND(HttpStatus.NOT_FOUND, "여행을 찾을 수 없습니다."),
     TRIP_ALREADY_ENDED(HttpStatus.CONFLICT, "이미 종료된 여행입니다."),
+    TRIP_NOT_ENDED(HttpStatus.CONFLICT, "아직 종료되지 않은 여행입니다."),
 
     MISSION_NOT_FOUND(HttpStatus.NOT_FOUND, "미션을 찾을 수 없습니다."),
     MISSION_ALREADY_STARTED(HttpStatus.CONFLICT, "이미 진행 중인 미션입니다."),

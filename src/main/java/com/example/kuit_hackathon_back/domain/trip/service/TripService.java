@@ -85,6 +85,9 @@ public class TripService {
     public TripReviewResponse getTripReview(Long userId, Long tripId) {
         getUserOrThrow(userId);
         Trip trip = getOwnedTripOrThrow(userId, tripId);
+        if (trip.isActive()) {
+            throw new BusinessException(ErrorCode.TRIP_NOT_ENDED);
+        }
         long success =
                 missionRepository.countByTrip_TripIdAndMissionStatus(tripId, MissionStatus.SUCCESS);
         long failed =
