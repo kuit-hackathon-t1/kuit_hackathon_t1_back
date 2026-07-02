@@ -9,5 +9,4 @@ public class KuitHackathonBackApplication {
     public static void main(String[] args) {
         SpringApplication.run(KuitHackathonBackApplication.class, args);
     }
-
 }
