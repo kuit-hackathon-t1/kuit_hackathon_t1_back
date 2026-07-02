@@ -1,5 +1,6 @@
 package com.example.kuit_hackathon_back.domain.trip.service;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
@@ -15,6 +16,8 @@ import com.example.kuit_hackathon_back.domain.trip.dto.CurrentTripResponse;
 import com.example.kuit_hackathon_back.domain.trip.dto.CurrentTripResponse.CollectionSummary;
 import com.example.kuit_hackathon_back.domain.trip.dto.CurrentTripResponse.MissionSummary;
 import com.example.kuit_hackathon_back.domain.trip.dto.EndTripResponse;
+import com.example.kuit_hackathon_back.domain.trip.dto.TripListResponse;
+import com.example.kuit_hackathon_back.domain.trip.dto.TripListResponse.TripSummary;
 import com.example.kuit_hackathon_back.domain.trip.dto.TripReviewResponse;
 import com.example.kuit_hackathon_back.domain.trip.entity.Trip;
 import com.example.kuit_hackathon_back.domain.trip.entity.TripStatus;
@@ -47,6 +50,15 @@ public class TripService {
                                         buildMissionSummary(trip.getTripId()),
                                         buildCollectionSummary(trip.getTripId())))
                 .orElseGet(CurrentTripResponse::empty);
+    }
+
+    public TripListResponse getTrips(Long userId) {
+        getUserOrThrow(userId);
+        List<TripSummary> trips =
+                tripRepository.findByUser_UserIdOrderByTripIdDesc(userId).stream()
+                        .map(this::toTripSummary)
+                        .toList();
+        return TripListResponse.of(trips);
     }
 
     @Transactional
@@ -106,6 +118,29 @@ public class TripService {
                 success,
                 failed,
                 total,
+                totalCollections);
+    }
+
+    private TripSummary toTripSummary(Trip trip) {
+        Long tripId = trip.getTripId();
+        long success =
+                missionRepository.countByTrip_TripIdAndMissionStatus(tripId, MissionStatus.SUCCESS);
+        long failed =
+                missionRepository.countByTrip_TripIdAndMissionStatus(tripId, MissionStatus.FAILURE);
+        long totalMissions = missionRepository.countByTrip_TripId(tripId);
+        long totalCollections = collectionRepository.countByTrip_TripId(tripId);
+        return new TripSummary(
+                trip.getTripId(),
+                trip.getTripName(),
+                trip.getRegion(),
+                trip.getStartDate(),
+                trip.getEndDate(),
+                trip.getCompanionType(),
+                trip.getMood(),
+                trip.getStatus(),
+                success,
+                failed,
+                totalMissions,
                 totalCollections);
     }
 

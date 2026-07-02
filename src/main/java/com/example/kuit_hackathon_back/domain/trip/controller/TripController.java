@@ -15,6 +15,7 @@ import com.example.kuit_hackathon_back.domain.trip.dto.CreateTripRequest;
 import com.example.kuit_hackathon_back.domain.trip.dto.CreateTripResponse;
 import com.example.kuit_hackathon_back.domain.trip.dto.CurrentTripResponse;
 import com.example.kuit_hackathon_back.domain.trip.dto.EndTripResponse;
+import com.example.kuit_hackathon_back.domain.trip.dto.TripListResponse;
 import com.example.kuit_hackathon_back.domain.trip.dto.TripReviewResponse;
 import com.example.kuit_hackathon_back.domain.trip.service.TripService;
 import com.example.kuit_hackathon_back.global.resolver.CurrentUserId;
@@ -27,6 +28,11 @@ import lombok.RequiredArgsConstructor;
 public class TripController {
 
     private final TripService tripService;
+
+    @GetMapping
+    public ResponseEntity<TripListResponse> getTrips(@CurrentUserId Long userId) {
+        return ResponseEntity.ok(tripService.getTrips(userId));
+    }
 
     @GetMapping("/current")
     public ResponseEntity<CurrentTripResponse> getCurrentTrip(@CurrentUserId Long userId) {
