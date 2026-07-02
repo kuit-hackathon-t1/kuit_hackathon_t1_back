@@ -43,6 +43,11 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+// bootJar(실행 가능한 jar)만 남기고, 배포 컨테이너에서 헷갈리지 않도록 plain jar는 만들지 않는다.
+tasks.named('jar') {
+    enabled = false
+}
+
 // 프론트(kuit-hackathon-t1-front)의 ESLint + Prettier 컨벤션에 대응하는
 // 백엔드 코드 스타일 자동 검사/정렬 도구
 spotless {
