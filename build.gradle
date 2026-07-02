@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '4.1.0'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'com.diffplug.spotless' version '6.25.0'
 }
 
 group = 'com.example'
@@ -36,4 +37,22 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+// 프론트(kuit-hackathon-t1-front)의 ESLint + Prettier 컨벤션에 대응하는
+// 백엔드 코드 스타일 자동 검사/정렬 도구
+spotless {
+    java {
+        target 'src/**/*.java'
+        googleJavaFormat('1.22.0').aosp()   // 4-space indent (.editorconfig와 동일)
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+        importOrder('java', 'javax', 'jakarta', 'org', 'com', '')
+    }
+}
+
+// PR CI에서 ./gradlew check 실행 시 스타일 검사도 함께 수행
+tasks.named('check') {
+    dependsOn 'spotlessCheck'
 }
