@@ -102,6 +102,16 @@ public class Mission extends BaseTimeEntity {
         this.missionStatus = MissionStatus.ACTIVE;
     }
 
+    /** 여행 종료(수동 종료)에 맞춰 SUCCESS/FAILURE가 아닌 미션을 일괄 CANCELLED 처리할 때 사용한다. */
+    public void cancelIfNotTerminal() {
+        if (this.missionStatus == MissionStatus.SUCCESS
+                || this.missionStatus == MissionStatus.FAILURE
+                || this.missionStatus == MissionStatus.CANCELLED) {
+            return;
+        }
+        this.missionStatus = MissionStatus.CANCELLED;
+    }
+
     public void complete(CollectionStatus collectionStatus) {
         if (this.missionStatus == MissionStatus.SUCCESS
                 || this.missionStatus == MissionStatus.FAILURE) {

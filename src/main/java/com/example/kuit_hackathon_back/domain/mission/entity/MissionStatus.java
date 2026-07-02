@@ -4,5 +4,6 @@ public enum MissionStatus {
     RECOMMENDED,
     ACTIVE,
     SUCCESS,
-    FAILURE
+    FAILURE,
+    CANCELLED // 다시 뽑기로 거절된 추천 미션
 }

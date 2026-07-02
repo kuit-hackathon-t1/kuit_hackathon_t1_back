@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.kuit_hackathon_back.domain.collection.entity.CollectionStatus;
 import com.example.kuit_hackathon_back.domain.collection.repository.CollectionRepository;
+import com.example.kuit_hackathon_back.domain.mission.entity.Mission;
 import com.example.kuit_hackathon_back.domain.mission.entity.MissionStatus;
 import com.example.kuit_hackathon_back.domain.mission.repository.MissionRepository;
 import com.example.kuit_hackathon_back.domain.trip.dto.CreateTripRequest;
@@ -91,6 +92,7 @@ public class TripService {
         getUserOrThrow(userId);
         Trip trip = getOwnedTripOrThrow(userId, tripId);
         trip.end();
+        cancelNonTerminalMissions(tripId);
         return EndTripResponse.from(trip);
     }
 
@@ -119,6 +121,11 @@ public class TripService {
                 failed,
                 total,
                 totalCollections);
+    }
+
+    /** 여행이 종료(수동 종료/기간 만료)될 때 SUCCESS/FAILURE가 아닌 미션을 전부 CANCELLED로 정리한다. */
+    private void cancelNonTerminalMissions(Long tripId) {
+        missionRepository.findByTrip_TripId(tripId).forEach(Mission::cancelIfNotTerminal);
     }
 
     private TripSummary toTripSummary(Trip trip) {

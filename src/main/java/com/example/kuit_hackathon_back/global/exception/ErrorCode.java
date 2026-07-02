@@ -19,6 +19,8 @@ public enum ErrorCode {
     MISSION_NOT_FOUND(HttpStatus.NOT_FOUND, "미션을 찾을 수 없습니다."),
     MISSION_ALREADY_STARTED(HttpStatus.CONFLICT, "이미 진행 중인 미션입니다."),
     MISSION_ALREADY_COMPLETED(HttpStatus.CONFLICT, "이미 완료된 미션입니다."),
+    MISSION_LIMIT_EXCEEDED(HttpStatus.CONFLICT, "여행 당 미션은 최대 12개까지 생성할 수 있습니다."),
+    ACTIVE_MISSION_LIMIT_EXCEEDED(HttpStatus.CONFLICT, "활성화된 미션이 이미 4개입니다. 진행 중인 미션을 먼저 완료해주세요."),
 
     COLLECTION_NOT_FOUND(HttpStatus.NOT_FOUND, "채집 기록을 찾을 수 없습니다."),
 

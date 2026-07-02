@@ -28,6 +28,9 @@ import lombok.RequiredArgsConstructor;
 @Transactional(readOnly = true)
 public class MissionService {
 
+    private static final int MAX_MISSIONS_PER_TRIP = 12;
+    private static final int MAX_ACTIVE_MISSIONS_PER_TRIP = 4;
+
     private final MissionRepository missionRepository;
     private final TripRepository tripRepository;
     private final UserRepository userRepository;
@@ -39,6 +42,13 @@ public class MissionService {
         Trip trip = getOwnedTripOrThrow(userId, tripId);
         if (!trip.isActive()) {
             throw new BusinessException(ErrorCode.TRIP_ALREADY_ENDED, "종료된 여행에서는 미션을 생성할 수 없습니다.");
+        }
+        if (missionRepository.countByTrip_TripId(tripId) >= MAX_MISSIONS_PER_TRIP) {
+            throw new BusinessException(ErrorCode.MISSION_LIMIT_EXCEEDED);
+        }
+        if (missionRepository.countByTrip_TripIdAndMissionStatus(tripId, MissionStatus.ACTIVE)
+                >= MAX_ACTIVE_MISSIONS_PER_TRIP) {
+            throw new BusinessException(ErrorCode.ACTIVE_MISSION_LIMIT_EXCEEDED);
         }
         MissionTemplate template = templateProvider.getRandomTemplate();
 
