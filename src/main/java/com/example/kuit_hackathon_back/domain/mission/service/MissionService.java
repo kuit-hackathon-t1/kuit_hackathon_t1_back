@@ -105,7 +105,7 @@ public class MissionService {
                 missionRepository
                         .findById(missionId)
                         .orElseThrow(() -> new BusinessException(ErrorCode.MISSION_NOT_FOUND));
-        if (!mission.isOwnedBy(userId)) {
+        if (mission.isOwnedBy(userId)) {
             throw new BusinessException(ErrorCode.MISSION_NOT_FOUND);
         }
         return mission;
