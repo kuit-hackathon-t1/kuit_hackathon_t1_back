@@ -53,6 +53,11 @@ public class MissionTemplateProvider {
         return TEMPLATES.get(random.nextInt(TEMPLATES.size()));
     }
 
+    /** AI 호출 실패 시 폴백용으로 하드코딩된 미션 풀 전체를 반환한다. */
+    public List<MissionTemplate> getAllTemplates() {
+        return TEMPLATES;
+    }
+
     public record MissionTemplate(
             String title,
             String description,

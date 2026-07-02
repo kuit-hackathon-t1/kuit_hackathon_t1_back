@@ -16,4 +16,15 @@ public interface MissionRepository extends JpaRepository<Mission, Long> {
     long countByTrip_TripId(Long tripId);
 
     long countByTrip_TripIdAndMissionStatus(Long tripId, MissionStatus missionStatus);
+
+    /** 사용자에게 아직 노출되지 않은 AI 추천 풀. */
+    List<Mission> findByTrip_TripIdAndDrawnAtIsNull(Long tripId);
+
+    /** 실제로 뽑혀서 사용자에게 노출된 미션만 조회할 때 사용한다. */
+    List<Mission> findByTrip_TripIdAndDrawnAtIsNotNull(Long tripId);
+
+    List<Mission> findByTrip_TripIdAndMissionStatusAndDrawnAtIsNotNull(
+            Long tripId, MissionStatus missionStatus);
+
+    long countByTrip_TripIdAndDrawnAtIsNotNull(Long tripId);
 }

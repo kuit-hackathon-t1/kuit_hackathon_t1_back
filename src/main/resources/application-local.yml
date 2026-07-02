@@ -21,3 +21,10 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+# AI 미션 추천(Gemini API) 설정
+# GEMINI_API_KEY는 절대 커밋하지 말고 환경변수로만 주입할 것 (예: IntelliJ Run Configuration, 셸 export 등).
+gemini:
+  api-key: ${GEMINI_API_KEY:}
+  # gemini-2.0-flash는 2026-06-01부로 종료된 모델이라 gemini-2.5-flash를 기본값으로 사용한다.
+  model: ${GEMINI_MODEL:gemini-2.5-flash}

@@ -1,5 +1,6 @@
 package com.example.kuit_hackathon_back.domain.mission.entity;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,6 +59,10 @@ public class Mission extends BaseTimeEntity {
     @Column(name = "is_local", nullable = false)
     private boolean local;
 
+    /** AI가 배치로 미리 생성해둔 추천 풀에 있을 뿐 아직 사용자에게 뽑혀서(노출되어) 나가지 않은 경우 null. */
+    @Column(name = "drawn_at")
+    private LocalDateTime drawnAt;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -89,6 +94,15 @@ public class Mission extends BaseTimeEntity {
 
     public void addGuide(String comment) {
         this.guides.add(MissionGuide.builder().mission(this).comment(comment).build());
+    }
+
+    /** AI 추천 풀에서 이 미션을 실제로 뽑아 사용자에게 보여줄 때 호출한다. */
+    public void draw() {
+        this.drawnAt = LocalDateTime.now();
+    }
+
+    public boolean isDrawn() {
+        return this.drawnAt != null;
     }
 
     public void start() {

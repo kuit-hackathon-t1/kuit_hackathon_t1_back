@@ -106,7 +106,7 @@ public class TripService {
                 missionRepository.countByTrip_TripIdAndMissionStatus(tripId, MissionStatus.SUCCESS);
         long failed =
                 missionRepository.countByTrip_TripIdAndMissionStatus(tripId, MissionStatus.FAILURE);
-        long total = missionRepository.countByTrip_TripId(tripId);
+        long total = missionRepository.countByTrip_TripIdAndDrawnAtIsNotNull(tripId);
         long totalCollections = collectionRepository.countByTrip_TripId(tripId);
         return new TripReviewResponse(
                 trip.getTripId(),
@@ -134,7 +134,7 @@ public class TripService {
                 missionRepository.countByTrip_TripIdAndMissionStatus(tripId, MissionStatus.SUCCESS);
         long failed =
                 missionRepository.countByTrip_TripIdAndMissionStatus(tripId, MissionStatus.FAILURE);
-        long totalMissions = missionRepository.countByTrip_TripId(tripId);
+        long totalMissions = missionRepository.countByTrip_TripIdAndDrawnAtIsNotNull(tripId);
         long totalCollections = collectionRepository.countByTrip_TripId(tripId);
         return new TripSummary(
                 trip.getTripId(),
@@ -152,7 +152,7 @@ public class TripService {
     }
 
     private MissionSummary buildMissionSummary(Long tripId) {
-        long total = missionRepository.countByTrip_TripId(tripId);
+        long total = missionRepository.countByTrip_TripIdAndDrawnAtIsNotNull(tripId);
         long active =
                 missionRepository.countByTrip_TripIdAndMissionStatus(tripId, MissionStatus.ACTIVE);
         long success =

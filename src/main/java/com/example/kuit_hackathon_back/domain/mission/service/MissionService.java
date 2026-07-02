@@ -1,10 +1,16 @@
 package com.example.kuit_hackathon_back.domain.mission.service;
 
+import java.security.SecureRandom;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.kuit_hackathon_back.domain.mission.ai.GeneratedMission;
+import com.example.kuit_hackathon_back.domain.mission.ai.MissionAiClient;
+import com.example.kuit_hackathon_back.domain.mission.ai.MissionAiRequest;
 import com.example.kuit_hackathon_back.domain.mission.dto.MissionDetailResponse;
 import com.example.kuit_hackathon_back.domain.mission.dto.MissionListResponse;
 import com.example.kuit_hackathon_back.domain.mission.dto.MissionStartResponse;
@@ -12,6 +18,7 @@ import com.example.kuit_hackathon_back.domain.mission.dto.MissionTemplateProvide
 import com.example.kuit_hackathon_back.domain.mission.dto.MissionTemplateProvider.MissionTemplate;
 import com.example.kuit_hackathon_back.domain.mission.dto.RandomMissionResponse;
 import com.example.kuit_hackathon_back.domain.mission.entity.Mission;
+import com.example.kuit_hackathon_back.domain.mission.entity.MissionCategory;
 import com.example.kuit_hackathon_back.domain.mission.entity.MissionStatus;
 import com.example.kuit_hackathon_back.domain.mission.repository.MissionRepository;
 import com.example.kuit_hackathon_back.domain.trip.entity.Trip;
@@ -28,13 +35,19 @@ import lombok.RequiredArgsConstructor;
 @Transactional(readOnly = true)
 public class MissionService {
 
+    private static final Logger log = LoggerFactory.getLogger(MissionService.class);
+
     private static final int MAX_MISSIONS_PER_TRIP = 12;
     private static final int MAX_ACTIVE_MISSIONS_PER_TRIP = 4;
+    private static final int MISSION_BATCH_SIZE = 15;
 
     private final MissionRepository missionRepository;
     private final TripRepository tripRepository;
     private final UserRepository userRepository;
     private final MissionTemplateProvider templateProvider;
+    private final MissionAiClient missionAiClient;
+
+    private final SecureRandom random = new SecureRandom();
 
     @Transactional
     public RandomMissionResponse createRandomMission(Long userId, Long tripId) {
@@ -43,27 +56,93 @@ public class MissionService {
         if (!trip.isActive()) {
             throw new BusinessException(ErrorCode.TRIP_ALREADY_ENDED, "종료된 여행에서는 미션을 생성할 수 없습니다.");
         }
-        if (missionRepository.countByTrip_TripId(tripId) >= MAX_MISSIONS_PER_TRIP) {
+        if (missionRepository.countByTrip_TripIdAndDrawnAtIsNotNull(tripId) >= MAX_MISSIONS_PER_TRIP) {
             throw new BusinessException(ErrorCode.MISSION_LIMIT_EXCEEDED);
         }
         if (missionRepository.countByTrip_TripIdAndMissionStatus(tripId, MissionStatus.ACTIVE)
                 >= MAX_ACTIVE_MISSIONS_PER_TRIP) {
             throw new BusinessException(ErrorCode.ACTIVE_MISSION_LIMIT_EXCEEDED);
         }
-        MissionTemplate template = templateProvider.getRandomTemplate();
 
+        List<Mission> pool = missionRepository.findByTrip_TripIdAndDrawnAtIsNull(tripId);
+        if (pool.isEmpty()) {
+            pool = generateMissionPool(user, trip);
+        }
+
+        Mission drawn = pool.get(random.nextInt(pool.size()));
+        drawn.draw();
+        missionRepository.save(drawn);
+
+        return RandomMissionResponse.from(drawn);
+    }
+
+    /** AI로 미션 배치를 생성해서 저장한다. AI 호출이 실패하면 하드코딩된 템플릿 풀로 폴백한다. */
+    private List<Mission> generateMissionPool(User user, Trip trip) {
+        try {
+            List<GeneratedMission> generated =
+                    missionAiClient.generateMissions(
+                            new MissionAiRequest(
+                                    trip.getTripName(),
+                                    trip.getRegion(),
+                                    trip.getCompanionType(),
+                                    trip.getMood(),
+                                    MISSION_BATCH_SIZE));
+            List<Mission> missions =
+                    generated.stream()
+                            .map(
+                                    g ->
+                                            buildMission(
+                                                    user,
+                                                    trip,
+                                                    g.title(),
+                                                    g.description(),
+                                                    g.missionCategory(),
+                                                    g.isLocal(),
+                                                    g.guides()))
+                            .toList();
+            return missionRepository.saveAll(missions);
+        } catch (RuntimeException e) {
+            log.warn(
+                    "AI 미션 생성 실패, 하드코딩 템플릿으로 폴백합니다. tripId={}, cause={}",
+                    trip.getTripId(),
+                    e.toString(),
+                    e);
+            List<Mission> fallback =
+                    templateProvider.getAllTemplates().stream()
+                            .map(
+                                    (MissionTemplate t) ->
+                                            buildMission(
+                                                    user,
+                                                    trip,
+                                                    t.title(),
+                                                    t.description(),
+                                                    t.category(),
+                                                    t.isLocal(),
+                                                    t.guides()))
+                            .toList();
+            return missionRepository.saveAll(fallback);
+        }
+    }
+
+    private Mission buildMission(
+            User user,
+            Trip trip,
+            String title,
+            String description,
+            MissionCategory category,
+            boolean isLocal,
+            List<String> guides) {
         Mission mission =
                 Mission.builder()
-                        .title(template.title())
-                        .description(template.description())
-                        .missionCategory(template.category())
-                        .local(template.isLocal())
+                        .title(title)
+                        .description(description)
+                        .missionCategory(category)
+                        .local(isLocal)
                         .user(user)
                         .trip(trip)
                         .build();
-        template.guides().forEach(mission::addGuide);
-
-        return RandomMissionResponse.from(missionRepository.save(mission));
+        guides.forEach(mission::addGuide);
+        return mission;
     }
 
     @Transactional
@@ -79,8 +158,9 @@ public class MissionService {
         getOwnedTripOrThrow(userId, tripId);
         List<Mission> missions =
                 (status == null)
-                        ? missionRepository.findByTrip_TripId(tripId)
-                        : missionRepository.findByTrip_TripIdAndMissionStatus(tripId, status);
+                        ? missionRepository.findByTrip_TripIdAndDrawnAtIsNotNull(tripId)
+                        : missionRepository.findByTrip_TripIdAndMissionStatusAndDrawnAtIsNotNull(
+                                tripId, status);
         return MissionListResponse.of(tripId, missions);
     }
 
@@ -104,6 +184,7 @@ public class MissionService {
         Mission mission =
                 missionRepository
                         .findById(missionId)
+                        .filter(Mission::isDrawn)
                         .orElseThrow(() -> new BusinessException(ErrorCode.MISSION_NOT_FOUND));
         if (mission.isOwnedBy(userId)) {
             throw new BusinessException(ErrorCode.MISSION_NOT_FOUND);
