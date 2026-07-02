@@ -35,11 +35,11 @@ public class MissionService {
 
     @Transactional
     public RandomMissionResponse createRandomMission(Long userId, Long tripId) {
+        User user = getUserOrThrow(userId);
         Trip trip = getOwnedTripOrThrow(userId, tripId);
         if (!trip.isActive()) {
             throw new BusinessException(ErrorCode.TRIP_ALREADY_ENDED, "종료된 여행에서는 미션을 생성할 수 없습니다.");
         }
-        User user = getUserOrThrow(userId);
         MissionTemplate template = templateProvider.getRandomTemplate();
 
         Mission mission =
@@ -58,12 +58,14 @@ public class MissionService {
 
     @Transactional
     public MissionStartResponse startMission(Long userId, Long missionId) {
+        getUserOrThrow(userId);
         Mission mission = getOwnedMissionOrThrow(userId, missionId);
         mission.start();
         return MissionStartResponse.from(mission);
     }
 
     public MissionListResponse getMissions(Long userId, Long tripId, MissionStatus status) {
+        getUserOrThrow(userId);
         getOwnedTripOrThrow(userId, tripId);
         List<Mission> missions =
                 (status == null)
@@ -73,6 +75,7 @@ public class MissionService {
     }
 
     public MissionDetailResponse getMissionDetail(Long userId, Long missionId) {
+        getUserOrThrow(userId);
         return MissionDetailResponse.from(getOwnedMissionOrThrow(userId, missionId));
     }
 

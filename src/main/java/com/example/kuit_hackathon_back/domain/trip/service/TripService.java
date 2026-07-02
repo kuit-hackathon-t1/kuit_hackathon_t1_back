@@ -37,6 +37,7 @@ public class TripService {
     private final CollectionRepository collectionRepository;
 
     public CurrentTripResponse getCurrentTrip(Long userId) {
+        getUserOrThrow(userId);
         return tripRepository
                 .findByUser_UserIdAndStatus(userId, TripStatus.ACTIVE)
                 .map(
@@ -50,6 +51,7 @@ public class TripService {
 
     @Transactional
     public CreateTripResponse createTrip(Long userId, CreateTripRequest request) {
+        User user = getUserOrThrow(userId);
         if (request.startDate().isAfter(request.endDate())) {
             throw new BusinessException(
                     ErrorCode.VALIDATION_ERROR,
@@ -59,7 +61,6 @@ public class TripService {
         if (tripRepository.existsByUser_UserIdAndStatus(userId, TripStatus.ACTIVE)) {
             throw new BusinessException(ErrorCode.ACTIVE_TRIP_ALREADY_EXISTS);
         }
-        User user = getUserOrThrow(userId);
         Trip trip =
                 Trip.builder()
                         .tripName(request.tripName())
@@ -75,12 +76,14 @@ public class TripService {
 
     @Transactional
     public EndTripResponse endTrip(Long userId, Long tripId) {
+        getUserOrThrow(userId);
         Trip trip = getOwnedTripOrThrow(userId, tripId);
         trip.end();
         return EndTripResponse.from(trip);
     }
 
     public TripReviewResponse getTripReview(Long userId, Long tripId) {
+        getUserOrThrow(userId);
         Trip trip = getOwnedTripOrThrow(userId, tripId);
         long success =
                 missionRepository.countByTrip_TripIdAndMissionStatus(tripId, MissionStatus.SUCCESS);

@@ -35,6 +35,7 @@ public class CollectionService {
 
     @Transactional
     public CreateCollectionResponse createCollection(Long userId, CreateCollectionRequest request) {
+        User user = getUserOrThrow(userId);
         Mission mission =
                 missionRepository
                         .findById(request.missionId())
@@ -49,10 +50,6 @@ public class CollectionService {
         if (!trip.isOwnedBy(userId)) {
             throw new BusinessException(ErrorCode.TRIP_NOT_FOUND);
         }
-        User user =
-                userRepository
-                        .findById(userId)
-                        .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         mission.complete(request.status());
 
@@ -75,6 +72,7 @@ public class CollectionService {
 
     public CollectionListResponse getCollections(
             Long userId, Long tripId, CollectionStatus status) {
+        getUserOrThrow(userId);
         getOwnedTripOrThrow(userId, tripId);
         List<Collection> collections =
                 (status == null)
@@ -84,6 +82,7 @@ public class CollectionService {
     }
 
     public CollectionDetailResponse getCollectionDetail(Long userId, Long collectionId) {
+        getUserOrThrow(userId);
         Collection collection =
                 collectionRepository
                         .findById(collectionId)
@@ -92,6 +91,12 @@ public class CollectionService {
             throw new BusinessException(ErrorCode.COLLECTION_NOT_FOUND);
         }
         return CollectionDetailResponse.from(collection);
+    }
+
+    private User getUserOrThrow(Long userId) {
+        return userRepository
+                .findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
     }
 
     private Trip getOwnedTripOrThrow(Long userId, Long tripId) {
