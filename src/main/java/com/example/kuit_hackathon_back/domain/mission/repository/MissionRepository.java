@@ -27,4 +27,7 @@ public interface MissionRepository extends JpaRepository<Mission, Long> {
             Long tripId, MissionStatus missionStatus);
 
     long countByTrip_TripIdAndDrawnAtIsNotNull(Long tripId);
+
+    /** RECOMMENDED(아직 시작 안 함)를 제외한, 실제로 시작(ACTIVE)되었거나 완료(SUCCESS/FAILURE)된 미션 수. */
+    long countByTrip_TripIdAndMissionStatusNot(Long tripId, MissionStatus missionStatus);
 }
