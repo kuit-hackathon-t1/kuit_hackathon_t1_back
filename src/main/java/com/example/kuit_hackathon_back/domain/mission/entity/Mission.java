@@ -138,6 +138,6 @@ public class Mission extends BaseTimeEntity {
     }
 
     public boolean isOwnedBy(Long userId) {
-        return !this.user.getUserId().equals(userId);
+        return this.user.getUserId().equals(userId);
     }
 }
