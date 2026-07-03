@@ -28,7 +28,8 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         CorsRegistration mapping = registry.addMapping("/api/**");
         mapping.allowedOriginPatterns(
-                "https://kuit-hackathon-t1-fron-*-leedongkyus-projects-*.vercel.app",
+                "kuit-hackathon-t1-front-git-main-leedongkyus-projects-c6361242.vercel.app",
+                "kuit-hackathon-t1-front.vercel.app",
                 "http://localhost:3000",
                 "http://localhost:5173");
         mapping.allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS");
