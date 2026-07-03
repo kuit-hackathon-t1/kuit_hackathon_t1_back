@@ -40,7 +40,7 @@ public class CollectionService {
                 missionRepository
                         .findById(request.missionId())
                         .orElseThrow(() -> new BusinessException(ErrorCode.MISSION_NOT_FOUND));
-        if (mission.isOwnedBy(userId)) {
+        if (!mission.isOwnedBy(userId)) {
             throw new BusinessException(ErrorCode.MISSION_NOT_FOUND);
         }
         Trip trip =
