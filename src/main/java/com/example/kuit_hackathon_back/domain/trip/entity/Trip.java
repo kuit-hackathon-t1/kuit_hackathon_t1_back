@@ -52,7 +52,7 @@ public class Trip extends BaseTimeEntity {
     private CompanionType companionType;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 30)
+    @Column(nullable = false, length = 30)
     private TripMood mood;
 
     @Enumerated(EnumType.STRING)
