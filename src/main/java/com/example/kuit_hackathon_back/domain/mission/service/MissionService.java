@@ -40,6 +40,7 @@ public class MissionService {
 
     /** 여행당 "시작"한(ACTIVE로 전환되었거나 이미 완료된) 미션 수의 상한. 뽑기만 반복하는 것은 이 한도를 소모하지 않는다. */
     private static final int MAX_MISSIONS_PER_TRIP = 12;
+
     private static final int MAX_ACTIVE_MISSIONS_PER_TRIP = 4;
     private static final int MISSION_BATCH_SIZE = 15;
 
@@ -58,7 +59,8 @@ public class MissionService {
         if (!trip.isActive()) {
             throw new BusinessException(ErrorCode.TRIP_ALREADY_ENDED, "종료된 여행에서는 미션을 생성할 수 없습니다.");
         }
-        if (missionRepository.countByTrip_TripIdAndMissionStatusNot(tripId, MissionStatus.RECOMMENDED)
+        if (missionRepository.countByTrip_TripIdAndMissionStatusNot(
+                        tripId, MissionStatus.RECOMMENDED)
                 >= MAX_MISSIONS_PER_TRIP) {
             throw new BusinessException(ErrorCode.MISSION_LIMIT_EXCEEDED);
         }
