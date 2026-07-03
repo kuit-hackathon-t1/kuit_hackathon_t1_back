@@ -15,6 +15,7 @@ public record MissionListResponse(Long tripId, List<MissionItem> missions) {
 
     public record MissionItem(
             Long missionId,
+            Long tripId,
             String title,
             String description,
             MissionCategory missionCategory,
@@ -24,6 +25,7 @@ public record MissionListResponse(Long tripId, List<MissionItem> missions) {
         public static MissionItem from(Mission mission) {
             return new MissionItem(
                     mission.getMissionId(),
+                    mission.getTrip().getTripId(),
                     mission.getTitle(),
                     mission.getDescription(),
                     mission.getMissionCategory(),
